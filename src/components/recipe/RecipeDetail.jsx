@@ -5,7 +5,7 @@ import { useReviews, useCreateReview } from '../../hooks/useReviews';
 import { useIsFavorited } from '../../hooks/useFavorites';
 import { getUserIdentifier } from '../../hooks/useFavorites';
 import { formatDate, getDifficultyColor, getStarRating } from '../../utils/helpers';
-import { ArrowLeft, Heart, Clock, Users, ChefHat, Star, Send, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Heart, Clock, Users, ChefHat, Star, Send, Edit, Trash2, Share2 } from 'lucide-react';
 import recipeService from '../../services/recipeService';
 import ConfirmModal from '../modals/ConfirmModal';
 import FavoriteButton from '../common/FavoriteButton';
@@ -72,11 +72,40 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
     await toggleFavorite();
   };
 
+  const handleShare = async () => {
+    const recipeUrl = `${window.location.origin}/recipe/${recipeId}`;
+    const shareData = {
+      title: recipe.name,
+      text: `Coba resep ${recipe.name} dari Resep Nusantara!`,
+      url: recipeUrl,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(recipeUrl);
+        alert('Link resep berhasil disalin ke clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(recipeUrl);
+        alert('Link resep berhasil disalin ke clipboard!');
+      } catch (clipboardError) {
+        console.error('Clipboard fallback failed:', clipboardError);
+        alert('Gagal membagikan resep. Silakan salin URL secara manual.');
+      }
+    }
+  };
+
   const handleDeleteRecipe = async () => {
     try {
       setDeleting(true);
       const result = await recipeService.deleteRecipe(recipeId);
-      
+
       if (result.success) {
         alert('Resep berhasil dihapus!');
         setShowDeleteModal(false);
@@ -205,8 +234,18 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             
-            {/* Favorite Button - Use component */}
-            <div className="absolute top-4 right-4 z-10">
+            {/* Action Buttons */}
+            <div className="absolute top-4 right-4 z-10 flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleShare();
+                }}
+                className="bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600 p-3 rounded-full backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-200 group"
+                title="Bagikan resep"
+              >
+                <Share2 className="w-5 h-5" />
+              </button>
               <FavoriteButton recipeId={recipeId} size="lg" />
             </div>
 

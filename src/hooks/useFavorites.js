@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import favoriteService from '../services/favoriteService';
-import userService from '../services/userService';
+import { useState, useEffect, useCallback } from "react";
+import favoriteService from "../services/favoriteService";
+import userService from "../services/userService";
 
 /**
  * Get user identifier from localStorage or generate new one
@@ -24,14 +24,14 @@ export function useFavorites() {
       setLoading(true);
       setError(null);
       const response = await favoriteService.getFavorites(userIdentifier);
-      
+
       if (response.success) {
         setFavorites(response.data || []);
       } else {
-        setError(response.message || 'Failed to fetch favorites');
+        setError(response.message || "Failed to fetch favorites");
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while fetching favorites');
+      setError(err.message || "An error occurred while fetching favorites");
       setFavorites([]);
     } finally {
       setLoading(false);
@@ -63,20 +63,20 @@ export function useToggleFavorite() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await favoriteService.toggleFavorite({
         recipe_id: recipeId,
         user_identifier: userIdentifier,
       });
-      
+
       if (response.success) {
         return response.data;
       } else {
-        setError(response.message || 'Failed to toggle favorite');
+        setError(response.message || "Failed to toggle favorite");
         return null;
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while toggling favorite');
+      setError(err.message || "An error occurred while toggling favorite");
       return null;
     } finally {
       setLoading(false);
@@ -98,8 +98,8 @@ export function useToggleFavorite() {
 export function useIsFavorited(recipeId) {
   const { favorites, loading: fetchLoading, refetch } = useFavorites();
   const { toggleFavorite: toggle, loading: toggleLoading } = useToggleFavorite();
-  
-  const isFavorited = favorites.some(fav => fav.id === recipeId);
+
+  const isFavorited = favorites.some((fav) => fav.recipe_id === recipeId);
 
   const toggleFavorite = async () => {
     const result = await toggle(recipeId);
